@@ -1,0 +1,8 @@
+
+*.jpg
+archive/list_attr_celeba.csv
+archive/list_bbox_celeba.csv
+__pycache__/data.cpython-311.pyc
+archive/list_eval_partition.csv
+archive/list_landmarks_align_celeba.csv
+processed_attributes.txt
