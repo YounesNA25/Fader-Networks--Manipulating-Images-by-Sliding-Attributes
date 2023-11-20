@@ -1,5 +1,6 @@
 
 *.jpg
-*.txt
 *.csv
 *.pyc
+*.zip
+processed_attributes
