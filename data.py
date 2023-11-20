@@ -16,7 +16,8 @@ class Datasets(torch.utils.data.Dataset):
         self.transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.CenterCrop((178, 178)),
-            transforms.Resize((input_size,input_size))
+            transforms.Resize((input_size,input_size)),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
             ])
 <<<<<<< Updated upstream
 =======
