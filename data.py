@@ -6,38 +6,20 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 class Datasets(torch.utils.data.Dataset):
-<<<<<<< Updated upstream
     def __init__(self, root, input_size = 178, ext = "jpg"):
         self.files = glob(os.path.join(root, f"*.{ext}"))
-=======
-    def __init__(self, root_images,root_atributes, input_size = 256, ext = "jpg"):
-        self.files = glob(os.path.join(root_images, f"*.{ext}"))
->>>>>>> Stashed changes
         self.transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.CenterCrop((178, 178)),
             transforms.Resize((input_size,input_size)),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
             ])
-<<<<<<< Updated upstream
-=======
-        self.atributes = pd.read_csv(root_atributes, usecols=lambda column: column not in ['image_id'])
-        
->>>>>>> Stashed changes
 
     def __getitem__(self, index):
         file_path = self.files[index]
         image = Image.open(file_path)
         image = self.transform(image)
-<<<<<<< Updated upstream
         return image
-=======
-        image_attributes = self.atributes.iloc[index].values
-        image_attributes = [0 if value == -1 else 1 for value in image_attributes.tolist()]
-        tensor_attributes = torch.tensor(image_attributes, dtype=torch.float32)
-
-        return image, tensor_attributes
->>>>>>> Stashed changes
 
     def __len__(self):
         return len(self.files)
