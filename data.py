@@ -25,7 +25,7 @@ class Datasets(torch.utils.data.Dataset):
         file_path = self.files[index]
         image = Image.open(file_path)
         image = self.transform(image)
-        image_attributes = self.atributes.iloc[index].values
+        image_attributes = self.atributes.iloc[index].values 
         image_attributes = [0 if value == -1 else 1 for value in image_attributes.tolist()]
         tensor_attributes = torch.tensor(image_attributes, dtype=torch.float32)
 
