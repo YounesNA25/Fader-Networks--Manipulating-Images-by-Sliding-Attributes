@@ -1,25 +1,52 @@
+# Autor Younes Nait_Omar
+
 import os
-import matplotlib.pyplot as plt
+
 import cv2
 import numpy as np
 import torch
 from tqdm import tqdm
 import pandas as pd
+import argparse
 
+parser = argparse.ArgumentParser(
+description="Preprocess raw images and attributs to uniformed target."
+    )
+parser.add_argument(
+        "--root-images",
+        help="Directory path to raw images.",
+        default="./archive/img_align_celeba/img_align_celeba",
+        type=str,
+    )
+parser.add_argument(
+        "--root-attributes",
+        help="Directory path to raw attributes.",
+        default="./archive/list_attr_celeba.csv",
+        type=str,
+    )
+parser.add_argument(
+        "--target-size",
+        help="Target size to resize ",
+        default=256,
+        type=int,
+    )
+parser.add_argument(
+        "--nb-images", help="number of images files extension to process.", default=202599, type=int)
 
+args = parser.parse_args()
 
 class PreProcessData:
 
-    def __init__(self, images_size=256, number_images=202599, images_path='archive/img_align_celeba/img_align_celeba', attributes_path='archive/list_attr_celeba.csv'):
-        self.number_images = number_images
-        self.images_size = images_size
-        self.images_path = images_path 
-        self.attributes_path = attributes_path
+    def __init__(self,args):
+        self.number_images = args.nb_images
+        self.images_size = args.target_size
+        self.images_path = args.root_images 
+        self.attributes_path = args.root_attributes
 
     def preprocess_images(self):
         print("Reading and Resizing images from img_align_celeba, wait few minutes ...")
         resized_images = []
-
+        
         for i in tqdm(range(1, self.number_images + 1), desc="Redimensionnement"):
             img = cv2.imread(self.images_path + '/%06i.jpg' % i)
             img = img[20:-20]
@@ -61,8 +88,8 @@ class PreProcessData:
 
 # Example usage:
 if __name__ == "__main__":
-    preprocessor = PreProcessData()
-    #preprocessor.preprocess_images()
+    preprocessor = PreProcessData(args)
+    preprocessor.preprocess_images()
     preprocessor.preprocess_attributes()
 
 
