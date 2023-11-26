@@ -58,7 +58,7 @@ class Encoder(nn.Module):
 
         self.encode_layers = [conv1,conv2,conv3,conv4,conv5,conv6,conv7]
 
-    def encodage(self, x):
+    def forward(self, x):
         """            
             Arguments:
                 x : Input tensor of size (1, 512, 3, 3)   
@@ -70,9 +70,6 @@ class Encoder(nn.Module):
             enc_output = layer(enc_output)
         return enc_output
     
-    def forward(self,x):
-        enc = self.encodage(x)
-        return enc
 
 
 
@@ -83,50 +80,50 @@ class Decoder(nn.Module):
 
 
         deconv1 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=512 + 2*n_attributes, out_channels=512, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=512 + n_attributes, out_channels=512, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(512),
             nn.ReLU())
 
             # Layer TC512
         deconv2 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=512 +  2*n_attributes, out_channels=256, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=512 + n_attributes, out_channels=256, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU())
 
             # Layer TC256
         deconv3 = nn.Sequential(    
-            nn.ConvTranspose2d(in_channels=256 +  2*n_attributes, out_channels=128, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=256 + n_attributes, out_channels=128, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU())
 
             # Layer TC128
         deconv4 = nn.Sequential(    
-            nn.ConvTranspose2d(in_channels=128 + 2*n_attributes, out_channels=64, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=128 + n_attributes, out_channels=64, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU())
 
             # Layer TC64
         deconv5 = nn.Sequential(    
-            nn.ConvTranspose2d(in_channels=64 + 2*n_attributes, out_channels=32, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=64 + n_attributes, out_channels=32, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU())
 
             # Layer TC32
         deconv6 = nn.Sequential(    
-            nn.ConvTranspose2d(in_channels=32 + 2*n_attributes, out_channels=16, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=32 + n_attributes, out_channels=16, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU())
 
             # Layer TC16
         deconv7 = nn.Sequential(    
-            nn.ConvTranspose2d(in_channels=16 + 2*n_attributes, out_channels=3, kernel_size=4, stride=2, padding=1),
+            nn.ConvTranspose2d(in_channels=16 + n_attributes, out_channels=3, kernel_size=4, stride=2, padding=1),
             nn.Tanh())  # Typically used for normalizing image data between -1 and 1
         
         self.decode_layers = [deconv1,deconv2,deconv3,deconv4,deconv5,deconv6,deconv7]
     
 
     """
-    def decodage(self, latent_layer, y):  
+    def forward(self, latent_layer, y):  
         y = torch.tensor(y)
         y = y.view(1,-1)
         y = y.unsqueeze(2).unsqueeze(3)    
@@ -140,7 +137,7 @@ class Decoder(nn.Module):
         return dec_outputs
     """
 
-    def decodage(self, latent_layer, y):
+    def forward(self, latent_layer, y):
             """            
             Arguments:
                 latent_layer : torch.Tensor - Last layer of the decoder architecture = a tensor of size (1, 512, 2, 2)
@@ -151,12 +148,13 @@ class Decoder(nn.Module):
             """
             
             y = torch.tensor(y)
-            y = y.view(1, -1)   
-            y = y.unsqueeze(2).unsqueeze(3) 
+            y = y.view(1, -1).unsqueeze(2).unsqueeze(3) 
+
+            print(y.size())
 
             batch_size = latent_layer.size(0)  #  1
             
-            dec_output = [latent_layer]
+            dec_output = latent_layer
             
             # Iterate through each layer in the decoder
             for layer in self.decode_layers:              
@@ -168,8 +166,40 @@ class Decoder(nn.Module):
 
 
 
-    def forward(self,enc,y):
-        dec = self.decodage(enc,y)
-        return dec
+
+class Discriminator(nn.Module):
+    def __init__(self, n_attributes):
+        super(Discriminator, self).__init__()
+        self.n_attributes = n_attributes
+
+        # Layer C512
+        self.conv512 = nn.Sequential(
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1, padding=1), #?
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2, inplace=True))
+
+        # Fully-connected neural network
+        self.fc_layer1 = nn.Sequential(
+            nn.Linear(512*2*2, 512),           # Taille d'entrée 2x2x512 ?
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(0.3))
+        
+        self.fc_layer2 = nn.Linear(512, n_attributes)
+
+    def forward(self, E_x):
+        """            
+            Arguments:
+                E_X : torch.Tensor - Last layer of the decoder architecture = a tensor of size (1, 512, 2, 2)
+                
+            Returns:
+                y: Output tensor of size (1, n_attributes)
+        """
+        y = self.conv512(E_x)         
+        y = torch.flatten(y, 1)  # Flatten before passing to fully-connected layers
+        
+        y = self.fc_layer1(y)
+        y = self.fc_layer2(y)
+    
+        return y
 
 
