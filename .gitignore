@@ -4,5 +4,5 @@
 *.pyc
 *.zip
 processed_attributes
-test.py
-Train_FaderNetwork_Lynda.ipynb
+test_src/test.py
+src/Train_FaderNetwork_Lynda.ipynb
