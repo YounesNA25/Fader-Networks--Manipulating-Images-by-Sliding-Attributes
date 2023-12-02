@@ -4,4 +4,4 @@
 *.pyc
 *.zip
 processed_attributes
-list_attr_Preprocessed
+list_attr_celeba_Preprocessed
