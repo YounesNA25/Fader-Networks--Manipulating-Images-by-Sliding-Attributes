@@ -77,7 +77,7 @@ class PreProcessData:
         for col in tqdm(df.columns, desc="Traitement des attributs"):
             attributes[col] = df[col].apply(lambda x: x == 1).to_numpy()
 
-        output_path = 'processed_attributes'
+        output_path = './Dataset/processed_attributes'
         torch.save(attributes, output_path)
         print("Preprocessing completed!")
 
