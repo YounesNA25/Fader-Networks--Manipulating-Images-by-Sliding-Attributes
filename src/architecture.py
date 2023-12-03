@@ -12,6 +12,7 @@ from PIL import Image
 import numpy as np
 
 
+
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
@@ -67,9 +68,8 @@ class Encoder(nn.Module):
         """
         enc_output = x
         for layer in self.encode_layers:
-            output = layer(outputs[-1])
-            outputs.append(output)
-        return outputs
+            enc_output = layer(enc_output)
+        return enc_output
     
 
 
@@ -121,17 +121,19 @@ class Decoder(nn.Module):
             nn.Tanh())  # Typically used for normalizing image data between -1 and 1
         
         self.decode_layers = [deconv1,deconv2,deconv3,deconv4,deconv5,deconv6,deconv7]
+    
 
     """
     def forward(self, latent_layer, y):  
         y = torch.tensor(y)
         y = y.view(1,-1)
         y = y.unsqueeze(2).unsqueeze(3)    
-        batch_size = latent_layers[0].size(0)
-        dec_outputs = [latent_layers[-1]]
+        batch_size = latent_layer.size(0)  # 1
+        dec_outputs = [latent_layer]
+        
         for layer in self.decode_layers:
             output_size = dec_outputs[-1].size(2)
-            input = torch.cat([dec_outputs[-1], y.expand(batch_size, 2*self.n_attributes, output_size, output_size)], dim = 1)
+            input = torch.cat([dec_outputs[-1], y.expand(batch_size, self.n_attributes, output_size, output_size)], dim = 1)
             dec_outputs.append(layer(input))
         return dec_outputs
     """
@@ -202,27 +204,3 @@ class Discriminator(nn.Module):
         return y
 
 
-class Descriminator(nn.Module):
-    
-    def __init__(self,n_attributes):
-        self.n_attributes = n_attributes
-
-        super(Descriminator,self).__init__()
-        self.conv = nn.Sequential( 
-            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=4, stride=2, padding=1),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Dropout2d(0.3)
-        )
-
-        self.linear = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(512,self.n_attributes)
-        )
-
-    def forward(self, latent_representation):
-        x = self.conv(latent_representation)
-        x = x.view(-1, 512)
-        x = self.linear(x)
-        return x
-    
