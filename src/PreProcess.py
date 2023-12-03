@@ -1,4 +1,4 @@
-# Autor Younes Nait_Omar
+# Autor Younes Nait-Achour / Massyl HAMDI
 
 import os
 
