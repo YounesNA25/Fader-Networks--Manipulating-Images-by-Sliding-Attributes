@@ -1,4 +1,3 @@
-# Autor Younes Nait-Achour
 import os
 from glob import glob
 import torch
@@ -12,65 +11,63 @@ from PIL import Image
 import numpy as np
 
 
-
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
-        conv1 = nn.Sequential(
+        self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True))
 
 
-        conv2 = nn.Sequential(
+        self.conv2 = nn.Sequential(
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.2, inplace=True))
 
             # Layer C64
-        conv3 = nn.Sequential(
+        self.conv3 = nn.Sequential(
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.2, inplace=True))
 
             # Layer C128
-        conv4 = nn.Sequential(
+        self.conv4 = nn.Sequential(
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2, inplace=True))
 
             # Layer C256
-        conv5 = nn.Sequential(
+        self.conv5 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(0.2, inplace=True))
 
             # Layer C512
-        conv6 = nn.Sequential(
+        self.conv6 = nn.Sequential(
             nn.Conv2d(in_channels=256, out_channels=512, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2, inplace=True))
 
             # Layer C512
-        conv7 = nn.Sequential(
+        self.conv7 = nn.Sequential(
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2, inplace=True)
         )
 
-        self.encode_layers = [conv1,conv2,conv3,conv4,conv5,conv6,conv7]
 
-    def forward(self, x):
-        """            
-            Arguments:
-                x : Input tensor of size (1, 512, 3, 3)   
-            Returns:
-                enc_output: Output tensor of size (1, 512, 2, 2)
-        """
-        enc_output = x
+        self.encode_layers = [self.conv1,self.conv2,self.conv3,self.conv4,self.conv5,self.conv6,self.conv7]
+
+    def encodage(self, x):
+        outputs = [x]
         for layer in self.encode_layers:
-            enc_output = layer(enc_output)
-        return enc_output
+            output = layer(outputs[-1])
+            outputs.append(output)
+        return outputs[-1]
     
+    def forward(self,x):
+        enc = self.encodage(x)
+        return enc
 
 
 
@@ -80,127 +77,85 @@ class Decoder(nn.Module):
         self.n_attributes = n_attributes
 
 
-        deconv1 = nn.Sequential(
+        self.deconv1 = nn.Sequential(
             nn.ConvTranspose2d(in_channels=512 + n_attributes, out_channels=512, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(512),
             nn.ReLU())
 
             # Layer TC512
-        deconv2 = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=512 + n_attributes, out_channels=256, kernel_size=4, stride=2, padding=1),
+        self.deconv2 = nn.Sequential(
+            nn.ConvTranspose2d(in_channels=512 +  n_attributes, out_channels=256, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU())
 
             # Layer TC256
-        deconv3 = nn.Sequential(    
-            nn.ConvTranspose2d(in_channels=256 + n_attributes, out_channels=128, kernel_size=4, stride=2, padding=1),
+        self.deconv3 = nn.Sequential(    
+            nn.ConvTranspose2d(in_channels=256 +  n_attributes, out_channels=128, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU())
 
             # Layer TC128
-        deconv4 = nn.Sequential(    
+        self.deconv4 = nn.Sequential(    
             nn.ConvTranspose2d(in_channels=128 + n_attributes, out_channels=64, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU())
 
             # Layer TC64
-        deconv5 = nn.Sequential(    
+        self.deconv5 = nn.Sequential(    
             nn.ConvTranspose2d(in_channels=64 + n_attributes, out_channels=32, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU())
 
             # Layer TC32
-        deconv6 = nn.Sequential(    
+        self.deconv6 = nn.Sequential(    
             nn.ConvTranspose2d(in_channels=32 + n_attributes, out_channels=16, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU())
 
             # Layer TC16
-        deconv7 = nn.Sequential(    
+        self.deconv7 = nn.Sequential(    
             nn.ConvTranspose2d(in_channels=16 + n_attributes, out_channels=3, kernel_size=4, stride=2, padding=1),
             nn.Tanh())  # Typically used for normalizing image data between -1 and 1
         
-        self.decode_layers = [deconv1,deconv2,deconv3,deconv4,deconv5,deconv6,deconv7]
-    
+        self.decode_layers = [self.deconv1,self.deconv2,self.deconv3,self.deconv4,self.deconv5,self.deconv6,self.deconv7]
 
-    """
-    def forward(self, latent_layer, y):  
-        y = torch.tensor(y)
-        y = y.view(1,-1)
+    def decodage(self, latent_layers, y):
+        y = y.view(-1,1)
         y = y.unsqueeze(2).unsqueeze(3)    
-        batch_size = latent_layer.size(0)  # 1
-        dec_outputs = [latent_layer]
-        
+        batch_size = latent_layers.size(0)
+        dec_outputs = latent_layers
         for layer in self.decode_layers:
-            output_size = dec_outputs[-1].size(2)
-            input = torch.cat([dec_outputs[-1], y.expand(batch_size, self.n_attributes, output_size, output_size)], dim = 1)
-            dec_outputs.append(layer(input))
+            output_size = dec_outputs.size(2)
+            input = torch.cat([dec_outputs, y.expand(batch_size, self.n_attributes, output_size, output_size)], dim = 1)
+            dec_outputs = layer(input)
         return dec_outputs
-    """
-
-    def forward(self, latent_layer, y):
-            """            
-            Arguments:
-                latent_layer : torch.Tensor - Last layer of the decoder architecture = a tensor of size (1, 512, 2, 2)
-                           y : np.ndarray   - A raw vector of size (1, nb_attributes) or (2, nb_attributes) ?
-                
-            Returns:
-                torch.Tensor: Output tensor of size (1, 3, 256, 256)
-            """
-            
-            y = torch.tensor(y)
-            y = y.view(1, -1).unsqueeze(2).unsqueeze(3) 
-
-            print(y.size())
-
-            batch_size = latent_layer.size(0)  #  1
-            
-            dec_output = latent_layer
-            
-            # Iterate through each layer in the decoder
-            for layer in self.decode_layers:              
-                # Concatenate the last output with y along the channel dimension
-                input = torch.cat([dec_output, y.expand(batch_size, self.n_attributes, dec_output.size(2), dec_output.size(2))], dim=1)
-                dec_output = layer(input)
-
-            return dec_output
+    
+    def forward(self,enc,y):
+        dec = self.decodage(enc,y)
+        return dec
 
 
-
-
-class Discriminator(nn.Module):
-    def __init__(self, n_attributes):
-        super(Discriminator, self).__init__()
+class Descriminator(nn.Module):
+    
+    def __init__(self,n_attributes):
         self.n_attributes = n_attributes
 
-        # Layer C512
-        self.conv512 = nn.Sequential(
-            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1, padding=1), #?
-            nn.BatchNorm2d(512),
-            nn.LeakyReLU(0.2, inplace=True))
-
-        # Fully-connected neural network
-        self.fc_layer1 = nn.Sequential(
-            nn.Linear(512*2*2, 512),           # Taille d'entrée 2x2x512 ?
+        super(Descriminator,self).__init__()
+        self.conv = nn.Sequential( 
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Dropout(0.3))
-        
-        self.fc_layer2 = nn.Linear(512, n_attributes)
+            nn.Dropout2d(0.3)
+        )
 
-    def forward(self, E_x):
-        """            
-            Arguments:
-                E_X : torch.Tensor - Last layer of the decoder architecture = a tensor of size (1, 512, 2, 2)
-                
-            Returns:
-                y: Output tensor of size (1, n_attributes)
-        """
-        y = self.conv512(E_x)         
-        y = torch.flatten(y, 1)  # Flatten before passing to fully-connected layers
-        
-        y = self.fc_layer1(y)
-        y = self.fc_layer2(y)
+        self.linear = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(512,self.n_attributes)
+        )
+
+    def forward(self, latent_representation):
+        x = self.conv(latent_representation)
+        x = x.view(-1, 512)
+        x = self.linear(x)
+        return x
     
-        return y
-
-

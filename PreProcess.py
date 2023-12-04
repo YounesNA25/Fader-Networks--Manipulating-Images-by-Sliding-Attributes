@@ -1,5 +1,3 @@
-# Autor Younes Nait-Achour / Massyl HAMDI
-
 import os
 
 import cv2
@@ -77,7 +75,7 @@ class PreProcessData:
         for col in tqdm(df.columns, desc="Traitement des attributs"):
             attributes[col] = df[col].apply(lambda x: x == 1).to_numpy()
 
-        output_path = './Dataset/processed_attributes'
+        output_path = 'processed_attributes'
         torch.save(attributes, output_path)
         print("Preprocessing completed!")
 
@@ -89,7 +87,7 @@ class PreProcessData:
 # Example usage:
 if __name__ == "__main__":
     preprocessor = PreProcessData(args)
-    preprocessor.preprocess_images()
+    # preprocessor.preprocess_images()
     preprocessor.preprocess_attributes()
 
 
