@@ -15,13 +15,13 @@ description="Preprocess raw images and attributs to uniformed target."
 parser.add_argument(
         "--root-images",
         help="Directory path to raw images.",
-        default="./Dataset/img_align_celeba/img_align_celeba",
+        default="./archive/img_align_celeba/img_align_celeba",
         type=str,
     )
 parser.add_argument(
         "--root-attributes",
         help="Directory path to raw attributes.",
-        default="./Dataset/list_attr_celeba.csv",
+        default="./archive/list_attr_celeba.csv",
         type=str,
     )
 parser.add_argument(
@@ -58,12 +58,12 @@ class PreProcessData:
             raise Exception("Found %i images. Expected %i" % (len(resized_images), self.number_images))
 
         print('Enregistrement des données')
-        if not os.path.exists('./Dataset/img_align_celeba_Preprocessed'):
-            os.makedirs('./Dataset/img_align_celeba_Preprocessed')
+        if not os.path.exists('resized_images'):
+            os.makedirs('resized_images')
 
         for i in tqdm(range(len(resized_images)), desc="Enregistrement"):
             assert resized_images[i].shape == (256,256,3)
-            cv2.imwrite('./Dataset/img_align_celeba_Preprocessed/%06i.jpg'%(i+1),resized_images[i])
+            cv2.imwrite('resized_images/%06i.jpg'%(i+1),resized_images[i])
 
         print('Done !')
 
@@ -84,11 +84,12 @@ class PreProcessData:
 
 
 
+
+
+# Example usage:
 if __name__ == "__main__":
     preprocessor = PreProcessData(args)
-    #preprocessor.preprocess_images()
+    preprocessor.preprocess_images()
     preprocessor.preprocess_attributes()
-
-# ou lance directement la commande dans le terminal << python PreProcess.py --root-images "./Dataset/mg_align_celeba" --root-attributes "./Dataset/list_attr_celeba.csv" >>
 
 
