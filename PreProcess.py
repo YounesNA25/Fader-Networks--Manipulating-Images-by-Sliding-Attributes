@@ -15,13 +15,13 @@ description="Preprocess raw images and attributs to uniformed target."
 parser.add_argument(
         "--root-images",
         help="Directory path to raw images.",
-        default="./data/img_align_celeba/img_align_celeba",
+        default="./Dataset/img_align_celeba/img_align_celeba",
         type=str,
     )
 parser.add_argument(
         "--root-attributes",
         help="Directory path to raw attributes.",
-        default="./data/list_attr_celeba.csv",
+        default="./Dataset/list_attr_celeba.csv",
         type=str,
     )
 parser.add_argument(
@@ -58,12 +58,12 @@ class PreProcessData:
             raise Exception("Found %i images. Expected %i" % (len(resized_images), self.number_images))
 
         print('Enregistrement des données')
-        if not os.path.exists('./data/img_align_celeba_Preprocessed'):
-            os.makedirs('./data/img_align_celeba_Preprocessed')
+        if not os.path.exists('./Dataset/img_align_celeba_Preprocessed'):
+            os.makedirs('./Dataset/img_align_celeba_Preprocessed')
 
         for i in tqdm(range(len(resized_images)), desc="Enregistrement"):
             assert resized_images[i].shape == (256,256,3)
-            cv2.imwrite('./data/img_align_celeba_Preprocessed/%06i.jpg'%(i+1),resized_images[i])
+            cv2.imwrite('./Dataset/img_align_celeba_Preprocessed/%06i.jpg'%(i+1),resized_images[i])
 
         print('Done !')
 
@@ -77,7 +77,7 @@ class PreProcessData:
         for col in tqdm(df.columns, desc="Traitement des attributs"):
             attributes[col] = df[col].apply(lambda x: x == 1).to_numpy()
 
-        output_path = './data/processed_attributes'
+        output_path = './Dataset/processed_attributes'
         torch.save(attributes, output_path)
         print("Preprocessing completed!")
 
@@ -89,6 +89,6 @@ if __name__ == "__main__":
     #preprocessor.preprocess_images()
     preprocessor.preprocess_attributes()
 
-# ou lance directement la commande dans le terminal << python PreProcess.py --root-images "./data/mg_align_celeba" --root-attributes "./data/list_attr_celeba.csv" >>
+# ou lance directement la commande dans le terminal << python PreProcess.py --root-images "./Dataset/mg_align_celeba" --root-attributes "./Dataset/list_attr_celeba.csv" >>
 
 
