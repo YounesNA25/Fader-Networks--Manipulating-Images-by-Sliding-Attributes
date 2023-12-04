@@ -38,7 +38,6 @@ class Train:
         self.descriminator.train()
         for batch_x, batch_y in self.data_loader:
             #batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
-            print('111')
             with torch.no_grad():  #bloc no_grad pour économiser de la mémoire en ne maintenant pas les calculs de la rétropropagation
                 enc = self.encoder(batch_x)
             predicted_y = self.descriminator(enc)
@@ -59,7 +58,7 @@ class Train:
         self.descriminator.train()
         for batch_x, batch_y in self.data_loader:
             #batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
-
+            print('1111')
             # encode / decode
             enc_output = self.encoder(Variable(batch_x))
             dec_output = self.decoder(enc_output,Variable(batch_y[0][0]))
@@ -69,7 +68,7 @@ class Train:
             lamdaE = self.lambda_step*float(min(self.n_tot_iter,self.lambda_final))/self.lambda_final
             y_pred = self.descriminator(enc_output)
             y_fake = 1-batch_y[0][0]
-            y_fake = y_fake.view(-1,1)
+            y_fake = y_fake.view(-1,1).float()
             loss = loss + lamdaE*criterion(y_pred,y_fake)
             self.encoder_optimizer.zero_grad()
             self.decoder_optimizer.zero_grad()
