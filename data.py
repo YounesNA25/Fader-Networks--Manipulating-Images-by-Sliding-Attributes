@@ -45,24 +45,3 @@ class Datasets(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.files)
     
-    
-def split_train_val_test(attributes_names):
-
-    train_set = Datasets(
-        root_images='.\data\img_align_celeba_Preprocessed', 
-        root_attributes='.\data\processed_attributes',
-        attributes=attributes_names,
-        chunk = 'train')
-    
-    test_set  = Datasets(root_images='.\data\img_align_celeba_Preprocessed',
-                         root_attributes='.\data\processed_attributes',
-                         attributes=attributes_names,
-                         chunk = 'test')
-    
-    val_set   = Datasets(root_images='.\data\img_align_celeba_Preprocessed', 
-                         root_attributes='.\data\processed_attributes',
-                         attributes=attributes_names,
-                         chunk = 'val')
-    
-    return train_set, test_set, val_set
-
