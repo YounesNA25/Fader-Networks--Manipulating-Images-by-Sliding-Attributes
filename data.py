@@ -12,7 +12,8 @@ class Datasets(torch.utils.data.Dataset):
         self.attributes = torch.load(root_attributes)
         self.attr_labels = torch.stack([torch.tensor(self.attributes[attr]) for attr in attributes], dim=1)
         self.transform = transforms.Compose([
-        transforms.ToTensor()])
+        transforms.ToTensor(), transforms.Normalize(mean=[0.5, 0.5, 0.5] , std=[0.5, 0.5, 0.5]) ])  # [0, 255] --> [ 0., 1.]
+        
         
         # Sélection des indices en fonction du chunk
         if chunk == 'train':
@@ -36,10 +37,32 @@ class Datasets(torch.utils.data.Dataset):
         file_path = self.files[index]
         image = Image.open(file_path)
         image = self.transform(image)
-        attributes = [Datasets.mapper(val) for val in self.attr_labels[index]]
+        attributes_onehot = [Datasets.mapper(val) for val in self.attr_labels[index]]
+        attributes = [1 if val else 0 for val in self.attr_labels[index]]
 
-        return image, attributes
+        return image, attributes_onehot
 
     def __len__(self):
         return len(self.files)
+    
+    
+def split_train_val_test(attributes_names):
+
+    train_set = Datasets(
+        root_images='.\data\img_align_celeba_Preprocessed', 
+        root_attributes='.\data\processed_attributes',
+        attributes=attributes_names,
+        chunk = 'train')
+    
+    test_set  = Datasets(root_images='.\data\img_align_celeba_Preprocessed',
+                         root_attributes='.\data\processed_attributes',
+                         attributes=attributes_names,
+                         chunk = 'test')
+    
+    val_set   = Datasets(root_images='.\data\img_align_celeba_Preprocessed', 
+                         root_attributes='.\data\processed_attributes',
+                         attributes=attributes_names,
+                         chunk = 'val')
+    
+    return train_set, test_set, val_set
 
