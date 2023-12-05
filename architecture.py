@@ -12,10 +12,19 @@ import numpy as np
 
 
 class Encoder(nn.Module):
-    '''
-    Input:  (batch_size=1, 3, 256, 256)
-    Output: (batch_size=1, 512, 2, 2)
-    '''
+    """
+    A convolutional encoder model.
+
+    This Encoder is part of of AE model.
+
+    Attributes:
+        conv1-conv7 (nn.Sequential): Convolutional layers with LeakyReLU activation
+        and Batch Normalization.
+
+    Methods:
+        encodage(x): Encodes an input image into a latent space representation.
+        forward(x): Forward pass of the encoder.
+    """
     def __init__(self):
         super(Encoder, self).__init__()
         self.conv1 = nn.Sequential(
@@ -82,10 +91,18 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    '''
-    Input: (batch_size=1, 512, 2,2),  attr_dim
-    Output: (batch_size=1, 3, 256, 256)
-    '''
+    """
+    A convolutional decoder model t.
+
+    Attributes:
+        n_attributes (int): Number of attributes to condition the generation on.
+        deconv1-deconv7 (nn.Sequential): Transposed convolutional layers with ReLU activation
+        and Batch Normalization.
+
+    Methods:
+        decodage(latent_layers, y): Decodes a latent representation into an image.
+        forward(enc, y): Forward pass of the decoder.
+    """
     def __init__(self, n_attributes):
         super(Decoder, self).__init__()
         self.n_attributes = n_attributes
@@ -158,10 +175,20 @@ class Decoder(nn.Module):
 
 
 class Discriminator(nn.Module):
-    '''
-    Input:  (batch_size=1, 512, 2, 2)
-    Output: (batch_size=1, num_attrs)
-    '''
+    """
+    A discriminator model for determining attributes from a latent representation.
+
+    This Discriminator is used in a generative model to classify the attributes
+    of the generated image.
+
+    Attributes:
+        n_attributes (int): Number of attributes to be predicted.
+        conv (nn.Sequential): A convolutional layer with LeakyReLU activation and dropout.
+        linear (nn.Sequential): Linear layers for attribute prediction.
+
+    Methods:
+        forward(latent_representation): Forward pass of the discriminator.
+    """
     
     def __init__(self,n_attributes):
         self.n_attributes = n_attributes
