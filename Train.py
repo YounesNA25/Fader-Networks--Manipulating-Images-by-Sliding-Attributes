@@ -13,6 +13,24 @@ import os
     
 
 class Train:
+    """
+    A class responsible for training an encoder, decoder, and discriminator model.
+    Attributes:
+        encoder (nn.Module): The encoder model.
+        decoder (nn.Module): The decoder model.
+        discriminator (nn.Module): The discriminator model.
+        data_loader_train (DataLoader): DataLoader for training data.
+        data_loader_test (DataLoader): DataLoader for test data.
+        data_loader_val (DataLoader): DataLoader for validation data.
+        batch_size (int): The size of each data batch.
+        encoder_optimizer (torch.optim.Adam): Optimizer for the encoder.
+        decoder_optimizer (torch.optim.Adam): Optimizer for the decoder.
+        discriminator_optimizer (torch.optim.Adam): Optimizer for the discriminator.
+
+    Methods:
+        discriminator_train(): Trains the discriminator model.
+        autoencoder_train(): Trains the autoencoder (encoder and decoder) models.
+    """
 
     def __init__(self, encoder, decoder, discriminator, data_loader_train, data_loader_test, data_loader_val, batch_size):
 
@@ -88,105 +106,105 @@ class Train:
             self.n_tot_iter += 1
             
     
-    def evaluation(self, epoch):
-        self.encoder.eval()
-        self.decoder.eval()
-        self.discriminator.eval()
+    # def evaluation(self, epoch):
+    #     self.encoder.eval()
+    #     self.decoder.eval()
+    #     self.discriminator.eval()
 
-        bce_loss = nn.BCEWithLogitsLoss()
-        mse_loss = nn.MSELoss()
+    #     bce_loss = nn.BCEWithLogitsLoss()
+    #     mse_loss = nn.MSELoss()
 
-        for batch_x, batch_y in self.data_loader_val:
-            #if self.use_cuda:
-                #batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
+    #     for batch_x, batch_y in self.data_loader_val:
+    #         #if self.use_cuda:
+    #             #batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
 
-            Ex            = self.encoder(batch_x)
-            reconstruct_x = self.decoder(Ex,batch_y[0][0])
-            y_pred        = self.discriminator(Ex)
+    #         Ex            = self.encoder(batch_x)
+    #         reconstruct_x = self.decoder(Ex,batch_y[0][0])
+    #         y_pred        = self.discriminator(Ex)
 
-            # Calculate losses
-            reconstruct_loss = mse_loss(reconstruct_x, batch_x)
+    #         # Calculate losses
+    #         reconstruct_loss = mse_loss(reconstruct_x, batch_x)
             
-            # map (1) --> (0), and (0) --> (1)
-            y_flipped = 1-batch_y[0][0]
-            y_flipped = y_flipped.view(-1,1).float()
+    #         # map (1) --> (0), and (0) --> (1)
+    #         y_flipped = 1-batch_y[0][0]
+    #         y_flipped = y_flipped.view(-1,1).float()
 
-            discrim_loss = bce_loss(y_pred,y_flipped)
-            lambdaE = self.lambda_step * float(min(self.n_tot_iter,self.lambda_final))/self.lambda_final
-            advers_loss = reconstruct_loss  + lambdaE * discrim_loss
+    #         discrim_loss = bce_loss(y_pred,y_flipped)
+    #         lambdaE = self.lambda_step * float(min(self.n_tot_iter,self.lambda_final))/self.lambda_final
+    #         advers_loss = reconstruct_loss  + lambdaE * discrim_loss
 
-            self.n_tot_iter += 1
+    #         self.n_tot_iter += 1
 
-            ### Display progress
-            print(self.step_msg.format(epoch,self.n_tot_iter,lambdaE,advers_loss.item(), reconstruct_loss.item(), discrim_loss.item()),
-                    end='\r',flush=True)
+    #         ### Display progress
+    #         print(self.step_msg.format(epoch,self.n_tot_iter,lambdaE,advers_loss.item(), reconstruct_loss.item(), discrim_loss.item()),
+    #                 end='\r',flush=True)
     
                         
 
                     
-            # Show result
-            flipped_x     = self.decoder(Ex,y_flipped)
-            src_image = (batch_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
-            rec_image = (reconstruct_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
-            flp_image = (flipped_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
+    #         # Show result
+    #         flipped_x     = self.decoder(Ex,y_flipped)
+    #         src_image = (batch_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
+    #         rec_image = (reconstruct_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
+    #         flp_image = (flipped_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
 
-            fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    #         fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-            axes[0].imshow(src_image[0])
-            axes[0].set_title('Original')
+    #         axes[0].imshow(src_image[0])
+    #         axes[0].set_title('Original')
 
-            axes[1].imshow(rec_image[0])
-            axes[1].set_title('Reconstructed (Correct Y)')
+    #         axes[1].imshow(rec_image[0])
+    #         axes[1].set_title('Reconstructed (Correct Y)')
 
-            axes[2].imshow(flp_image[0])
-            axes[2].set_title('Reconstructed (Flipped Y)')
+    #         axes[2].imshow(flp_image[0])
+    #         axes[2].set_title('Reconstructed (Flipped Y)')
 
-            plt.show()
-            break
+    #         plt.show()
+    #         break
 
-            ### Test 
-            if True:
-                self.encoder.eval()
-                self.decoder.eval()
+    #         ### Test 
+    #         if True:
+    #             self.encoder.eval()
+    #             self.decoder.eval()
 
-                for batch_x_test, batch_y_test in enumerate(self.data_loader_test):
-                    #if self.use_cuda:
-                        #batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
+    #             for batch_x_test, batch_y_test in enumerate(self.data_loader_test):
+    #                 #if self.use_cuda:
+    #                     #batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
 
-                    # randomly choose an attribute and swap the targets
-                    #to_swap = np.random.choice(self.data_loader_test.attr_labels )
-                    #swap_idx, = np.where(self.data_loader_test.attr_labels == to_swap)[0]
+    #                 # randomly choose an attribute and swap the targets
+    #                 #to_swap = np.random.choice(self.data_loader_test.attr_labels )
+    #                 #swap_idx, = np.where(self.data_loader_test.attr_labels == to_swap)[0]
 
-                    # map (1) --> (0), and (0) --> (1)
-                    y_flipped = 1-batch_y_test[0][0]
-                    y_flipped = y_flipped.view(-1,1).float()
+    #                 # map (1) --> (0), and (0) --> (1)
+    #                 y_flipped = 1-batch_y_test[0][0]
+    #                 y_flipped = y_flipped.view(-1,1).float()
 
-                    Ex            = self.encoder(batch_x_test)
-                    reconstruct_x = self.decoder(Ex,batch_y_test[0][0])
-                    flipped_x     = self.decoder(Ex,y_flipped)
+    #                 Ex            = self.encoder(batch_x_test)
+    #                 reconstruct_x = self.decoder(Ex,batch_y_test[0][0])
+    #                 flipped_x     = self.decoder(Ex,y_flipped)
 
-                    ### Display progress
-                    print(self.step_msg.format(epoch,self.n_tot_iter,lambdaE,advers_loss.item(), reconstruct_loss.item(), discrim_loss.item()),
-                    end='\r',flush=True)
+    #                 ### Display progress
+    #                 print(self.step_msg.format(epoch,self.n_tot_iter,lambdaE,advers_loss.item(), reconstruct_loss.item(), discrim_loss.item()),
+    #                 end='\r',flush=True)
                             
-                    # Show result
-                    src_image = (batch_x_test.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
-                    rec_image = (reconstruct_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
-                    flp_image = (flipped_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
+    #                 # Show result
+    #                 src_image = (batch_x_test.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
+    #                 rec_image = (reconstruct_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
+    #                 flp_image = (flipped_x.data.numpy().transpose(0, 2, 3, 1) + 1) / 2
 
-                    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    #                 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-                    axes[0].imshow(src_image[0])
-                    axes[0].set_title('Original')
+    #                 axes[0].imshow(src_image[0])
+    #                 axes[0].set_title('Original')
 
-                    axes[1].imshow(rec_image[0])
-                    axes[1].set_title('Reconstructed (Correct Y)')
+    #                 axes[1].imshow(rec_image[0])
+    #                 axes[1].set_title('Reconstructed (Correct Y)')
 
-                    axes[2].imshow(flp_image[0])
-                    axes[2].set_title('Reconstructed (Flipped Y)')
+    #                 axes[2].imshow(flp_image[0])
+    #                 axes[2].set_title('Reconstructed (Flipped Y)')
 
-                    plt.show()
-                    break
+    #                 plt.show()
+    #                 break
 
 
         
