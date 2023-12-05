@@ -12,6 +12,10 @@ import numpy as np
 
 
 class Encoder(nn.Module):
+    '''
+    Input:  (batch_size=1, 3, 256, 256)
+    Output: (batch_size=1, 512, 2, 2)
+    '''
     def __init__(self):
         super(Encoder, self).__init__()
         self.conv1 = nn.Sequential(
@@ -66,12 +70,22 @@ class Encoder(nn.Module):
         return outputs[-1]
     
     def forward(self,x):
+        """            
+            Arguments:
+                x : Input tensor of size (1, 512, 3, 3)   
+            Returns:
+                enc_output: Output tensor of size (1, 512, 2, 2)
+        """
         enc = self.encodage(x)
         return enc
 
 
 
 class Decoder(nn.Module):
+    '''
+    Input: (batch_size=1, 512, 2,2),  attr_dim
+    Output: (batch_size=1, 3, 256, 256)
+    '''
     def __init__(self, n_attributes):
         super(Decoder, self).__init__()
         self.n_attributes = n_attributes
@@ -131,16 +145,28 @@ class Decoder(nn.Module):
         return dec_outputs
     
     def forward(self,enc,y):
+        """            
+            Arguments:
+                latent_layer : torch.Tensor - Last layer of the decoder architecture = a tensor of size (1, 512, 2, 2)
+                           y : (1, nb_attributes) or (2, nb_attributes) ?
+                
+            Returns:
+                torch.Tensor: Output tensor of size (1, 3, 256, 256)
+        """
         dec = self.decodage(enc,y)
         return dec
 
 
-class Descriminator(nn.Module):
+class Discriminator(nn.Module):
+    '''
+    Input:  (batch_size=1, 512, 2, 2)
+    Output: (batch_size=1, num_attrs)
+    '''
     
     def __init__(self,n_attributes):
         self.n_attributes = n_attributes
 
-        super(Descriminator,self).__init__()
+        super(Discriminator,self).__init__()
         self.conv = nn.Sequential( 
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=4, stride=2, padding=1),
             nn.LeakyReLU(0.2, inplace=True),
@@ -154,8 +180,17 @@ class Descriminator(nn.Module):
         )
 
     def forward(self, latent_representation):
+        """            
+            Arguments:
+                latent_representation : torch.Tensor - Last layer of the decoder architecture = a tensor of size (1, 512, 2, 2)
+                
+            Returns:
+                y: Output tensor of size (1, n_attributes)
+        """
         x = self.conv(latent_representation)
         x = x.view(-1, 512)
         x = self.linear(x)
+        x = torch.sigmoid(x)  # Convert probabilities to logits
+
         return x
     
