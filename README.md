@@ -30,7 +30,7 @@ The dataset that we used is the [CelebA](https://mmlab.ie.cuhk.edu.hk/projects/C
 ./preprocess.py
 ```
 
-it will generate the `data/resized_images/` file where images are resized from (178, 218, 3) to (256, 256, 3). Another file containing mapped attributes will be generated at `data/processed_attributes.pt/`, following scheme: `-1` is mapped to `[0, 1]`, and `1` is mapped to `[1, 0]`. 
+it will generate the `data/resized_images/` file where images are resized from `178x218x3` to `256x256x3`. Another file containing mapped attributes will be generated at `data/processed_attributes.pt/`, following scheme: `-1` is mapped to `[0, 1]`, and `1` is mapped to `[1, 0]`. 
 
 ## *Rapport sur overleaf*:
 https://www.overleaf.com/project/65707d2d277e0e67e96e8232
