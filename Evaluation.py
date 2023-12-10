@@ -27,11 +27,17 @@ class Evaluation:
         evaluation() : takes the number of epochs
     """
 
-    def __init__(self, encoder, decoder, discriminator, data_loader_val, batch_size, use_cuda=True):
+    def __init__(self, encoder, decoder, discriminator, data_loader_val, batch_size, n_attr, use_cuda=True):
 
-        self.encoder       = encoder
-        self.decoder       = decoder
-        self.discriminator = discriminator
+        self.use_cuda = use_cuda
+        if self.use_cuda:
+            self.encoder = encoder().cuda()
+            self.decoder = decoder(n_attr).cuda()
+            self.discriminator = discriminator(n_attr).cuda()
+        else:
+            self.encoder = encoder()
+            self.decoder = decoder(n_attr)
+            self.discriminator = discriminator(n_attr)
 
         self.data_loader_val  = data_loader_val
 
@@ -59,14 +65,19 @@ class Evaluation:
 
         for batch_x, batch_y in self.data_loader_val:
             if self.use_cuda:
+                # if isinstance(batch_x, list):
+                #     batch_x = torch.tensor(batch_x, dtype=torch.float32)
+                # if isinstance(batch_y, list):
+                #     batch_y = torch.tensor(batch_y, dtype=torch.float32)
+                
                 batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
 
             Ex            = self.encoder(batch_x)
-            reconstruct_x = self.decoder(Ex,batch_y[0][0])
+            reconstruct_x = self.decoder(Ex,batch_y[:,0])
             y_pred        = self.discriminator(Ex)
 
             # Flip y_ped : map (1) --> (0), and (0) --> (1)
-            y_flipped = 1-batch_y[0][0]
+            y_flipped = 1-batch_y[:,0]
             y_flipped = y_flipped.view(-1,1).float()
 
             # Compute losses
