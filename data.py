@@ -8,20 +8,22 @@ import torchvision.transforms as transforms
 
 class Datasets(torch.utils.data.Dataset):
     def __init__(self, root_images, root_attributes, attributes='Male', ext="jpg", chunk=None):
-        self.files = glob(os.path.join(root_images, f"*.{ext}"))
+        self.files = sorted(glob(os.path.join(root_images, f"*.{ext}")))
         self.attributes = torch.load(root_attributes)
         self.attr_labels = torch.stack([torch.tensor(self.attributes[attr]) for attr in attributes], dim=1)
         self.transform = transforms.Compose([
-        transforms.ToTensor(), transforms.Normalize(mean=[0.5, 0.5, 0.5] , std=[0.5, 0.5, 0.5]) ])  # [0, 255] --> [ 0., 1.]
-        
+        transforms.ToTensor()])
         
         # Sélection des indices en fonction du chunk
         if chunk == 'train':
-            self.indices = torch.arange(0, 162770)
+            # self.indices = torch.arange(0, 162770)
+            self.indices = torch.arange(0,1000)
         elif chunk == 'test':
-            self.indices = torch.arange(162770, 182637)
+            # self.indices = torch.arange(162770, 182637)
+            self.indices = torch.arange(1000,1500)
         elif chunk == 'val':
-            self.indices = torch.arange(182637, 202599)
+            # self.indices = torch.arange(182637, 202599)
+            self.indices = torch.arange(1500,2000)
         else:
             self.indices = torch.arange(0, len(self.files))  # Utiliser tous les fichiers si aucun chunk spécifié
 
@@ -37,11 +39,10 @@ class Datasets(torch.utils.data.Dataset):
         file_path = self.files[index]
         image = Image.open(file_path)
         image = self.transform(image)
-        attributes_onehot = [Datasets.mapper(val) for val in self.attr_labels[index]]
-        attributes = [1 if val else 0 for val in self.attr_labels[index]]
+        attributes = [Datasets.mapper(val) for val in self.attr_labels[index]]
 
-        return image, attributes_onehot
+        return image, torch.tensor(attributes)[0,:]
 
     def __len__(self):
         return len(self.files)
-    
+
