@@ -32,12 +32,19 @@ class Train:
         autoencoder_train(): Trains the autoencoder (encoder and decoder) models.
     """
 
-    def __init__(self, encoder, decoder, discriminator, data_loader_train, batch_size, use_cuda=True):
-
+    def __init__(self, encoder, decoder, discriminator, data_loader_train, batch_size, n_attr, use_cuda=True):
         
-        self.encoder = encoder
-        self.decoder = decoder
-        self.discriminator = discriminator
+        self.use_cuda = use_cuda
+        if self.use_cuda:
+            self.encoder = encoder().cuda()
+            self.decoder = decoder(n_attr).cuda()
+            self.discriminator = discriminator(n_attr).cuda()
+            torch.cuda.empty_cache()
+            
+        else:
+            self.encoder = encoder()
+            self.decoder = decoder(n_attr)
+            self.discriminator = discriminator(n_attr)
         
         self.data_loader_train = data_loader_train
 
@@ -48,11 +55,11 @@ class Train:
         lr = 0.002
         betas = (0.5, 0.999)
 
-        self.use_cuda = use_cuda
+        
 
-        self.encoder_optimizer = torch.optim.Adam(encoder.parameters(), lr=lr, betas=betas)
-        self.decoder_optimizer = torch.optim.Adam(decoder.parameters(), lr=lr, betas=betas)
-        self.discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=betas)
+        self.encoder_optimizer = torch.optim.Adam(self.encoder.parameters(), lr=lr, betas=betas)
+        self.decoder_optimizer = torch.optim.Adam(self.decoder.parameters(), lr=lr, betas=betas)
+        self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=betas)
 
 
         # loss history
@@ -71,7 +78,13 @@ class Train:
         criterion = nn.BCEWithLogitsLoss()
         
         for batch_x, batch_y in self.data_loader_train:
+            
             if self.use_cuda:
+            #     if isinstance(batch_x, list):
+            #         batch_x = torch.tensor(batch_x, dtype=torch.float32)
+            #     if isinstance(batch_y, list):
+            #         batch_y = torch.tensor(batch_y, dtype=torch.float32)
+                
                 batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
            
             # Disable gradient calculation to save memory and avoid backpropagation
@@ -99,6 +112,7 @@ class Train:
 
             # Update the discriminator parameters using the optimizer
             self.discriminator_optimizer.step()
+           
             
 
 
@@ -116,17 +130,21 @@ class Train:
         
         for batch_x, batch_y in self.data_loader_train:
             if self.use_cuda:
+                # if isinstance(batch_x, list):
+                #     batch_x = torch.tensor(batch_x, dtype=torch.float32)
+                # if isinstance(batch_y, list):
+                #     batch_y = torch.tensor(batch_y, dtype=torch.float32)
                 batch_x,batch_y = batch_x.cuda(),batch_y.cuda()
-
+            # print(batch_y)
             # Encode input and decode output
             enc_output = self.encoder(batch_x)
-            dec_output = self.decoder(enc_output,batch_y[0][0])
+            dec_output = self.decoder(enc_output,batch_y[:,0])
 
             # Forward pass through discriminator
             y_pred = self.discriminator(enc_output)
 
             # Flip y_pred :  map (1) --> (0), and (0) --> (1)
-            y_fake = 1-batch_y[0][0]
+            y_fake = 1-batch_y[:,0]
             y_fake = y_fake.view(-1,1).float()
 
             # Compute autoencoder loss from reconstruction
@@ -232,16 +250,3 @@ class Train:
     def save_model_parameters(self, model, filepath):
         print(f'Saving {model.__class__.__name__} parameters to {filepath}')
         torch.save(model.state_dict(), filepath)
-
-
-            
-    
-
-
-
-
-
-
-
-        
-
