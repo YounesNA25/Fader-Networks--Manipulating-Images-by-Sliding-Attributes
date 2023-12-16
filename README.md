@@ -38,12 +38,9 @@ datafolder
 |  | 000002.jpg
 |  | 000003.jpg
 |  | 000004.jpg
-|  | .
-|  | .
-|  | .
-
-|  processed_attributes
 ...
+|  processed_attributes
+
 ```
 
 ## *Rapport sur overleaf*:
