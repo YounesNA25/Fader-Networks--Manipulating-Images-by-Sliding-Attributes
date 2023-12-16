@@ -14,7 +14,7 @@ FEDDAK Lynda
 
 ## *Fader Nework global architecture:*
 
-![Alt Text](Results/architecture.png "Main architecture : Encoder, decoder and discriminator")
+![Main architecture : Encoder, decoder and discriminator](Results/architecture.png)
 
 ![Alt Text](Results/detailed%20architecture.png "Detailed architecture : Encoder, decoder and discriminator")
 
