@@ -16,7 +16,7 @@ FEDDAK Lynda
 
 ![Alt Text](Results/architecture.png "Main architecture : Encoder, decoder and discriminator")
 
-![Alt Text](Results/detailed architecture.png "Detailed architecture : Encoder, decoder and discriminator")
+![Alt Text](Results/detailed%20architecture.png "Detailed architecture : Encoder, decoder and discriminator")
 
 ## Dependencies
 - Python
@@ -49,8 +49,7 @@ Above are samples of images along with their attributes, as well as a histogram 
 ![Alt Text](Results/histogram_attributes.png "Distribution of Attribute Appearances in Training, Evaluation, and Test Sets")
 
 ## Train your own models
-You can esily train a new model with train.py. It will train the encoder, decoder and discriminator. At real time a graphic of losses est mis a jour losses of : the reconstruc loss , adversial loss and discriminator loss. Below is a complete list of all parameters:
-
+You can easily train a new model with `train.py`. It will train the `encoder`, `decoder`, and `discriminator`. In real-time, a graph of losses is updated, including the `reconstruction loss`, `adversarial loss`, and `discriminator loss`. Below is a complete list of all parameters:
 
 ```bash
 python train.py
@@ -71,7 +70,8 @@ Run the following command to start the training :
 ```
 
 ## Grid Interpolation Results
-Here we added a weight \alpha multiply to the attributes to see the reconstructed images step by step. we use the test dataset run this following commant with precizing the parameters :
+We have introduced a weight (\alpha) multiplication to the attributes, allowing us to observe the reconstructed images step by step. To execute this, use the following command on the test dataset, specifying the required parameters:
+
 ```batch
 # Smiling
 python Interpolation.py --root_rszimages "your/path/to/resized/images/folder" --root_attributes "your/path/to/attributes/file" --attr_chg ["Smiling"] --encoder_fpath "your/path/to/encoder/smiling/model" --decoder_fpath "your/path/to/decoder/smiling/model" --discriminator_fpath "your/path/to/discriminator/smiling/model" --nb_alpha 10 --nb-x2flip 1 
@@ -83,6 +83,9 @@ python Interpolation.py --root_rszimages "your/path/to/resized/images/folder" --
 python Interpolation.py --root_rszimages "your/path/to/resized/images/folder" --root_attributes "your/path/to/attributes/file" --attr_chg ["Smiling"] --encoder_fpath "your/path/to/encoder/gender/model" --decoder_fpath "your/path/to/decoder/gender/model" --discriminator_fpath "your/path/to/discriminator/gender/model" --nb_alpha 10 --nb-x2flip 1 
 
 ```
+
+The command will generate and save images in a grid format with `nb_x2flip` rows and `nb_alpha + 1` columns, showcasing the interpolated images across `nb_alpha` different steps. The first column represents the original image, while the subsequent columns display the interpolated images. The (\alpha) values are chosen from the range 0 to 1 when y is equal to `[0, 1]` and from 1 to 0 when y is equal to `[1, 0]`. 
+
 Here are our results :
 ![Alt Text](Results/smiling_grid.png "Interpolated Results: Smiling Grid")
 
