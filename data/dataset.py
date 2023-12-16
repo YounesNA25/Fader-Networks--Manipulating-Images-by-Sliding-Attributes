@@ -1,9 +1,10 @@
 import os
 from glob import glob
+
 import torch
 import torch.utils.data
-from PIL import Image
 import torchvision.transforms as transforms
+from PIL import Image
 
 
 class Datasets(torch.utils.data.Dataset):

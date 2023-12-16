@@ -1,11 +1,12 @@
 # Import des bibliothèques nécessaires
+import argparse
 import os
+
 import cv2
 import numpy as np
+import pandas as pd
 import torch
 from tqdm import tqdm
-import pandas as pd
-import argparse
 
 parser = argparse.ArgumentParser(description="Preprocess raw images and attributs to uniformed target.")
 parser.add_argument("--root-images", help="Directory path to raw images.", default="./archive/img_align_celeba/img_align_celeba", type=str)

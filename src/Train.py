@@ -1,15 +1,19 @@
+import argparse
 import os
+import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
-from data.dataset import Datasets
-from src.architecture import Encoder, Decoder, Discriminator
-import argparse
-from tqdm import tqdm
 from IPython.display import clear_output
-import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+from data.dataset import Datasets
+from architecture import Decoder, Discriminator, Encoder
 
 
 def parse_args():
@@ -102,7 +106,7 @@ def load_checkpoints(encoder, decoder, discriminator, args, use_cuda):
         if use_cuda:
             discriminator.cuda()
         print(f"discriminateur loaded from {args.discriminator_checkpoint}")
-        
+
     return encoder, decoder, discriminator
 
 def live_plot(data_dict, figsize=(7,5), title=''):
