@@ -123,7 +123,7 @@ def build_test_data_loader(args):
         test_dataset,
         batch_size=args.batch_size,
         shuffle=True,
-        num_workers=1,
+        num_workers=0,
     )
 
 

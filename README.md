@@ -28,7 +28,7 @@ FEDDAK Lynda
 ## Data
 The dataset that we used is the [CelebA](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) dataset, which is easily accessible and consisting of 202,599 images. Extract all the images and save them in the `datafolder/img_align_celeba/` directory. Additionally, the dataset provides a file `list_attr_celeba.txt` containing the list of the 40 attributes associated with each image, save it in the `datafolder/` directory. In order to preprocess the dataset, execute the folliwing command: 
 ```batch
-python preprocess.py --root_images "your/path/to/resized/images/folder" --root_attributes "your/path/to/attributes/file"
+python data/PreProcess.py --root-images "your/path/to/resized/images/folder" --root-attributes "your/path/to/attributes/file"
 ```
 
 it will generate the `datafolder/resized_images/` file where images are resized from `178x218x3` to `256x256x3`. Another file containing mapped attributes will be generated at `datafolder/processed_attributes/`, following scheme: `-1` is mapped to `[0, 1]`, and `1` is mapped to `[1, 0]`. 
@@ -66,7 +66,7 @@ python train.py
 
 Run the following command to start the training :
 ```batch
-%run train.py 
+python src/Train.py --root-rszimages "your/path/to/resized/images/folder" --root-attributes "your/path/to/attributes/file"
 ```
 
 ## Grid Interpolation Results

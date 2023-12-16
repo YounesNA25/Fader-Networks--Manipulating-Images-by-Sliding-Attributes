@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train Fader_Network On dataset")
     parser.add_argument("--root-rszimages", help="Directory path to resized images.", default="resized_images/", type=str)
     parser.add_argument("--root-attributes", help="Directory path to processed attributes.", default="processed_attributes", type=str)
-    parser.add_argument("--attr-chg", help="Attributes to change.", default=['Smiling'], type=list)
+    parser.add_argument("--attr-chg", help="Attributes to change.", default=['Male'], type=list)
     parser.add_argument("--batch-size", default = 32, type=int, help="Batch size")    
     parser.add_argument("--epochs-max", default = 1000, type=int, help="Epochs of train loop")
     parser.add_argument("--save-interval", default=10, type=int, help="Interval of epochs to save model checkpoints")
@@ -175,7 +175,7 @@ def train_one_epoch(encoder, decoder, discriminator, train_data_loader, n_tot_it
     avg_reconstruct_loss = total_reconstruct_loss / len(train_data_loader)
     avg_advers_loss = total_advers_loss / len(train_data_loader)
     avg_dis_loss = total_dis_loss / len(train_data_loader)
-    return avg_reconstruct_loss, avg_advers_loss, avg_dis_loss
+    return avg_reconstruct_loss, avg_advers_loss, avg_dis_loss, n_tot_iter
 
 def eval_one_epoch(encoder, decoder, discriminator,eval_data_loader, n_tot_iter, lambda_step, lambda_final, mse_loss, bce_loss, use_cuda):
     """
@@ -213,7 +213,7 @@ def eval_one_epoch(encoder, decoder, discriminator,eval_data_loader, n_tot_iter,
         
         total_dis_loss += dis_loss.item()
 
-        n_tot_iter += 1
+        # n_tot_iter += 1
 
     avg_reconstruct_loss = total_reconstruct_loss / len(eval_data_loader)
     avg_advers_loss = total_advers_loss / len(eval_data_loader)
@@ -250,7 +250,7 @@ def train_model(args, use_cuda=True):
         
     for n_epoch in range(args.epochs_max):
         
-        avg_reconstruct_loss, avg_advers_loss, avg_dis_loss = train_one_epoch(encoder, decoder, discriminator, train_data_loader, n_tot_iter, lambda_step, lambda_final, encoder_optimizer, decoder_optimizer, discriminator_optimizer, mse_loss, bce_loss, use_cuda)
+        avg_reconstruct_loss, avg_advers_loss, avg_dis_loss, n_tot_iter = train_one_epoch(encoder, decoder, discriminator, train_data_loader, n_tot_iter, lambda_step, lambda_final, encoder_optimizer, decoder_optimizer, discriminator_optimizer, mse_loss, bce_loss, use_cuda)
         
         avg_reconstruct_loss_eval, avg_advers_loss_eval, avg_dis_loss_eval = eval_one_epoch(encoder, decoder, discriminator, eval_data_loader, n_tot_iter, lambda_step, lambda_final, mse_loss, bce_loss, use_cuda)
 
