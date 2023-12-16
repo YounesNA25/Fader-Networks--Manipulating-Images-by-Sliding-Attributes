@@ -1,11 +1,10 @@
-
 import argparse
 import json
 import os
 import random
 import sys
-
 import cv2 as cv
+import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import PIL
@@ -30,7 +29,7 @@ def parse_args():
         help="Use CUDA.",
         default=False,
         type=bool,
-    )                
+    )
     parser.add_argument(
         "--root-rezimages",
         help="Directory path to resized images.",
@@ -40,7 +39,7 @@ def parse_args():
     parser.add_argument(
         "--root-attributes",
         help="Directory path to processed attributes.",
-        default='datafolder/processed_attributes',
+        default="datafolder/processed_attributes",
         type=str,
     )
     parser.add_argument(
@@ -64,14 +63,14 @@ def parse_args():
     parser.add_argument(
         "--nb-x2flip",
         help="Number of images to change.",
-        default=5,
+        default=1,
         type=int,
     )
     parser.add_argument(
-        "--epochs-max",
-        default=5,
+        "--sample-batch",
+        default=20,
         type=int,
-        help="Epochs of train loop",
+        help="The frequency for displaying and saving results.",
     )
     parser.add_argument(
         "--batch-size",
@@ -131,19 +130,25 @@ def build_test_data_loader(args):
 def load_networks(arg):
     encoder = Encoder()
     if arg.use_CPU:
-        encoder.load_state_dict(torch.load(arg.encoder_fpath,map_location=torch.device('cpu')))
+        encoder.load_state_dict(
+            torch.load(arg.encoder_fpath, map_location=torch.device("cpu"))
+        )
     else:
         encoder.load_state_dict(torch.load(arg.encoder_fpath))
 
     decoder = Decoder(arg.num_attributes)
     if arg.use_CPU:
-        decoder.load_state_dict(torch.load(arg.decoder_fpath,map_location=torch.device('cpu')))
+        decoder.load_state_dict(
+            torch.load(arg.decoder_fpath, map_location=torch.device("cpu"))
+        )
     else:
         decoder.load_state_dict(torch.load(arg.decoder_fpath))
 
     discriminator = Discriminator(arg.num_attributes)
     if arg.use_CPU:
-        discriminator.load_state_dict(torch.load(arg.discriminator_fpath,map_location=torch.device('cpu')))
+        discriminator.load_state_dict(
+            torch.load(arg.discriminator_fpath, map_location=torch.device("cpu"))
+        )
     else:
         discriminator.load_state_dict(torch.load(arg.discriminator_fpath))
 
@@ -166,62 +171,102 @@ def grid_one_epoch(arg, encoder, decoder, discriminator, test_data_loader):
     decoder.eval()
     discriminator.eval()
 
-    for batch_x, batch_y in tqdm(test_data_loader, desc="Test progress"):
-        if arg.use_cuda:
-            batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
+    nb_grid = 1
 
-        y2flip = np.random.choice(arg.attr_chg, arg.nb_attributes2flip, replace=False)
-        y2flip_idx = np.where(np.isin(arg.attr_chg, y2flip))[0]
+    for batch_idx, (batch_x, batch_y) in enumerate(
+        tqdm(test_data_loader, desc="Test progress")
+    ):
+        if batch_idx % arg.sample_batch == 0:
+            if arg.use_cuda:
+                batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
 
-        x2flip_idx = np.random.choice(batch_x.shape[0], arg.nb_x2flip, replace=False)
-        print(len(x2flip_idx))
-        x2flip = batch_x[x2flip_idx]
+            y2flip = np.random.choice(
+                arg.attr_chg, arg.nb_attributes2flip, replace=False
+            )
+            y2flip_idx = np.where(np.isin(arg.attr_chg, y2flip))[0]
 
-        Ex = encoder(batch_x)
-        Ex2flip = Ex[x2flip_idx]
+            x2flip_idx = np.random.choice(
+                batch_x.shape[0], arg.nb_x2flip, replace=False
+            )
+            print(len(x2flip_idx))
+            x2flip = batch_x[x2flip_idx]
 
-        y_true = batch_y[:,0]
-        y_true = y_true[x2flip_idx]
-        y_flipped = 1 - y_true
+            Ex = encoder(batch_x)
+            Ex2flip = Ex[x2flip_idx]
 
-        fig, axes = plt.subplots(
-            arg.nb_attributes2flip * arg.nb_x2flip, arg.nb_alpha + 1, figsize=(15, 5)
-        )
+            y_true = batch_y[:, 0]
+            y_true = y_true[x2flip_idx]
+            y_flipped = 1 - y_true
 
-        idx = 0
-        for x, z, y_flip in zip(x2flip, Ex2flip, y_flipped):
-            z = torch.unsqueeze(z, dim=0)
+            fig, axes = plt.subplots(
+                arg.nb_attributes2flip * arg.nb_x2flip,
+                arg.nb_alpha + 1,
+                figsize=(18, 2 * arg.nb_x2flip),
+            )
 
-            #axes[idx][0].imshow(tensor_to_image(x))
+            idx = 0
+            for x, z, y_flip in zip(x2flip, Ex2flip, y_flipped):
+                z = torch.unsqueeze(z, dim=0)
 
-            title = arg.attr_chg[y2flip_idx[0]] +": " + str(1-y_flip[0].item()) + " > " + str(y_flip[0].item())  
+                rect = patches.Rectangle(
+                    (1, 1),
+                    256,
+                    256,
+                    linewidth=4,
+                    edgecolor="lightgreen",
+                    facecolor="none",
+                )
+                if arg.nb_x2flip > 1:
+                    axes[idx][0].imshow(tensor_to_image(x))
+                    axes[idx][0].add_patch(rect)
+                    axes[idx][0].axis("off")
+                else:
+                    axes[0].imshow(tensor_to_image(x))
+                    axes[0].add_patch(rect)
+                    axes[0].axis("off")
 
-            
+                title = (
+                    arg.attr_chg[y2flip_idx[0]]
+                    + ": "
+                    + str(1 - y_flip[0].item())
+                    + " > "
+                    + str(y_flip[0].item())
+                )
+                alphas = (
+                    np.linspace(0, 1, arg.nb_alpha)
+                    if y_flip[0].item() == 1
+                    else np.linspace(1, 0, arg.nb_alpha)
+                )
+                for idy, alpha in enumerate(alphas):
+                    y_alpha = torch.tensor([alpha], dtype=torch.float32)
 
-            alphas = np.linspace(0, 1, arg.nb_alpha) if y_flip[0].item() == 1 else np.linspace(1, 0, arg.nb_alpha)
-            for idy, alpha in enumerate(alphas):
-                y_alpha = torch.tensor([alpha], dtype=torch.float32)
+                    flipped_x = decoder(z, y_alpha)
 
-                flipped_x = decoder(z, y_alpha)
-                axes[idx][idy].imshow(tensor_to_image(flipped_x))   # idy+1 , if : axes[idx][0].imshow(tensor_to_image(x))
-                axes[0][0].set_ylabel(title)  # title = flipped attribute 
+                    if arg.nb_x2flip > 1:
+                        axes[idx][idy + 1].imshow(
+                            tensor_to_image(flipped_x)
+                        )  # idy+1 , if : axes[idx][0].imshow(tensor_to_image(x))
+                        axes[idx][idy + 1].axis("off")
+                    else:
+                        axes[idy + 1].imshow(tensor_to_image(flipped_x))
+                        axes[idy + 1].axis("off")
 
-            idx += 1
+                idx += 1
 
-        print(idx)
+            plt.subplots_adjust(wspace=0, hspace=0)
 
-        for row in axes:
-            for ax in row:
-                ax.axis('off')
+            # Save the figure
+            plt.savefig(
+                f".\Results\grid\{arg.attr_chg[y2flip_idx[0]]}\{arg.attr_chg[y2flip_idx[0]]}_{nb_grid}.png"
+            )
+            nb_grid += 1
+            plt.show()
 
-        plt.show()
-        
 
 def test_model(args, use_cuda=True):
     encoder, decoder, discriminator = load_networks(args)
     test_data_loader = build_test_data_loader(args)
-    for n_epoch in range(args.epochs_max):
-        grid_one_epoch(args, encoder, decoder, discriminator, test_data_loader)
+    grid_one_epoch(args, encoder, decoder, discriminator, test_data_loader)
 
 
 if __name__ == "__main__":
