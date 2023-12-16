@@ -53,13 +53,13 @@ def parse_args():
     parser.add_argument(
         "--to-show-hist",
         help="Bool to show histogram of attributes",
-        default=True,
+        default=False,
         type=bool,
     )
     parser.add_argument(
         "--to-show-img",
         help="Bool to show grid of dataset images",
-        default=False,
+        default=True,
         type=bool,
     )
 
