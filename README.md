@@ -25,6 +25,11 @@ FEDDAK Lynda
 - [ScriPy](https://scipy.org/)
 - [OpenCV](https://opencv.org/)
 
+Run the following command to install the Dependencies
+```batch
+pip install -r requirements.txt
+```
+
 ## 📁 Data
 The dataset that we used is the [CelebA](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) dataset, which is easily accessible and consisting of 202,599 images. Extract all the images and save them in the `datafolder/img_align_celeba/` directory. Additionally, the dataset provides a file `list_attr_celeba.txt` containing the list of the 40 attributes associated with each image, save it in the `datafolder/` directory. In order to preprocess the dataset, execute the folliwing command: 
 ```batch
