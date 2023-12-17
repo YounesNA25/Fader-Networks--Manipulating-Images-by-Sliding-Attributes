@@ -102,4 +102,6 @@ Here are our results :
 ![Alt Text](Results/smiling_grid.png "Interpolated Results: Smiling Grid")
 **Eyeglasses Grid**
 ![Alt Text](Results/eyeglasses_grid.png "Interpolated Results: Eyeglasses Grid")
+**Male Grid**
+![Alt Text](Results/Male_female_grid.png "Interpolated Results: Male Grid")
 
