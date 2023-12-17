@@ -9,7 +9,7 @@ Fader Networks employ an encoder-decoder architecture to modify attributes of re
 ## 🤝 Autors
 
 HAMDI Massyl Yanis  
-NIAT ACHOUR Younes   
+NAIT ACHOUR Younes   
 FEDDAK Lynda  
 
 ## *Fader Nework global architecture:*
