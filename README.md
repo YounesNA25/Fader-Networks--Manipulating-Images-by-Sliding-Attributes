@@ -93,5 +93,8 @@ python Interpolation.py --root_rszimages "your/path/to/resized/images/folder" --
 The command will generate and save images in a grid format with `nb_x2flip` rows and `nb_alpha + 1` columns, showcasing the interpolated images across `nb_alpha` different steps. The first column represents the original image, while the subsequent columns display the interpolated images. The (\alpha) values are chosen from the range 0 to 1 when y is equal to `[0, 1]` and from 1 to 0 when y is equal to `[1, 0]`. The results will be saved in the following path : `Results\grid\smiling` or `Results\grid\Eyeglasses` or  `Results\grid\Male` 
 
 Here are our results :
+**Smiling Grid**
 ![Alt Text](Results/smiling_grid.png "Interpolated Results: Smiling Grid")
+**Eyeglasses Grid**
+![Alt Text](Results/eyeglasses_grid.png "Interpolated Results: Eyeglasses Grid")
 
