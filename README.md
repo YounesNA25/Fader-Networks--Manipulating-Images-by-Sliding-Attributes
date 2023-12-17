@@ -64,9 +64,15 @@ python train.py
   --discriminator_checkpoint     # Path to the discriminator checkpoint file for resuming training
 ```
 
-Run the following command to start the training :
+Run the following command in a notebook to start the training and the losses live plot:
 ```batch
-python src/Train.py --root-rszimages "your/path/to/resized/images/folder" --root-attributes "your/path/to/attributes/file"
+%run train.py 
+```
+
+Or run this following command in your terminal:
+
+```batch
+python train.py 
 ```
 
 ## Grid Interpolation Results
@@ -84,10 +90,8 @@ python Interpolation.py --root_rszimages "your/path/to/resized/images/folder" --
 
 ```
 
-The command will generate and save images in a grid format with `nb_x2flip` rows and `nb_alpha + 1` columns, showcasing the interpolated images across `nb_alpha` different steps. The first column represents the original image, while the subsequent columns display the interpolated images. The (\alpha) values are chosen from the range 0 to 1 when y is equal to `[0, 1]` and from 1 to 0 when y is equal to `[1, 0]`. 
+The command will generate and save images in a grid format with `nb_x2flip` rows and `nb_alpha + 1` columns, showcasing the interpolated images across `nb_alpha` different steps. The first column represents the original image, while the subsequent columns display the interpolated images. The (\alpha) values are chosen from the range 0 to 1 when y is equal to `[0, 1]` and from 1 to 0 when y is equal to `[1, 0]`. The results will be saved in the following path : `Results\grid\smiling` or `Results\grid\Eyeglasses` or  `Results\grid\Male` 
 
 Here are our results :
 ![Alt Text](Results/smiling_grid.png "Interpolated Results: Smiling Grid")
 
-## *Rapport sur overleaf*:
-https://www.overleaf.com/project/65707d2d277e0e67e96e8232
