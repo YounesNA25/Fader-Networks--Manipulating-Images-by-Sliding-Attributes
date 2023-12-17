@@ -12,7 +12,7 @@ def parse_args():
     parser.add_argument(
         "--fpath",
         help="path to losses.txt",
-        default='trained models\eyeglasses_losses_file.txt', 
+        default='trained models\male_losses_file.txt', 
         type=str,
     )
     args = parser.parse_args()
