@@ -1,12 +1,12 @@
 # Fader Networks : Manipulating Images by Sliding Attributes
 
-## Introduction
+## 🚀 Introduction
 
 This repository showcases our machine learning project using [Pytorch](https://pytorch.org/), inspired by [Fader Networks](https://arxiv.org/abs/1706.00409) concept introduced by Guillaume Lample, Neil Zeghidour, Nicolas Usunier, Antoine Bordes, Ludovic Denoyer, and Marc'Aurelio Ranzato.
 
 Fader Networks employ an encoder-decoder architecture to modify attributes of real images, such as gender, age, and the addition of eccesories like glasses. Throughout this process, the network preserves the intrinsic character of the image while generating diverse and realistic versions.
 
-## Autors
+## 🤝 Autors
 
 HAMDI Massyl Yanis  
 NIAT ACHOUR Younes   
@@ -18,14 +18,14 @@ FEDDAK Lynda
 
 ![Alt Text](Results/detailed%20architecture.png "Detailed architecture : Encoder, decoder and discriminator")
 
-## Dependencies
+## ⚙️ Dependencies
 - Python
 - [Pytorch](https://pytorch.org/)
 - [NumPy](https://numpy.org/)
 - [ScriPy](https://scipy.org/)
 - [OpenCV](https://opencv.org/)
 
-## Data
+## 📁 Data
 The dataset that we used is the [CelebA](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) dataset, which is easily accessible and consisting of 202,599 images. Extract all the images and save them in the `datafolder/img_align_celeba/` directory. Additionally, the dataset provides a file `list_attr_celeba.txt` containing the list of the 40 attributes associated with each image, save it in the `datafolder/` directory. In order to preprocess the dataset, execute the folliwing command: 
 ```batch
 python data/PreProcess.py --root-images "your/path/to/resized/images/folder" --root-attributes "your/path/to/attributes/file"
@@ -48,7 +48,7 @@ Above are samples of images along with their attributes, as well as a histogram 
 ![Alt Text](Results/dataset.png "Dataset Overview: Sample Images")
 ![Alt Text](Results/histogram_attributes.png "Distribution of Attribute Appearances in Training, Evaluation, and Test Sets")
 
-## Train your own models
+## 📈 Train your own models
 You can easily train a new model with `train.py`. It will train the `encoder`, `decoder`, and `discriminator`. In real-time, a graph of losses is updated, including the `reconstruction loss`, `adversarial loss`, and `discriminator loss`. Below is a complete list of all parameters:
 
 ```bash
@@ -75,7 +75,7 @@ Or run this following command in your terminal:
 python train.py 
 ```
 
-## Grid Interpolation Results
+## 📍 Grid Interpolation Results
 We have introduced a weight (\alpha) multiplication to the attributes, allowing us to observe the reconstructed images step by step. To execute this, use the following command on the test dataset, specifying the required parameters:
 
 ```batch
